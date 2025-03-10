@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define N 5  // Number of philosophers
-#define LEFT (i + N - 1) % N  // Left neighbor
-#define RIGHT (i + 1) % N  // Right neighbor
+#define N 5  
+#define LEFT (i + N - 1) % N  
+#define RIGHT (i + 1) % N  
 
 enum { THINKING, HUNGRY, EATING } state[N];
 pthread_mutex_t mutex;
