@@ -1,47 +1,46 @@
 #include <stdio.h>
 
-int main() {
-    int i, j, k, f, pf = 0, count = 0, n;
-    int rs[25], m[10];
+int fifoPageReplacement(int pages[], int n, int f) {
+    int frame[f], front = 0, count = 0, pageFaults = 0;
 
-    printf("\nEnter the length of reference string: ");
+    for (int i = 0; i < f; i++)
+        frame[i] = -1; 
+
+    for (int i = 0; i < n; i++) {
+        int found = 0;
+        // Check if page is already in frame
+        for (int j = 0; j < f; j++) {
+            if (frame[j] == pages[i]) {
+                found = 1;
+                break;
+            }
+        }
+        // If page is not found, replace using FIFO
+        if (!found) {
+            frame[front] = pages[i];
+            front = (front + 1) % f; 
+            pageFaults++;
+        }
+    }
+    return pageFaults;
+}
+
+int main() {
+    int n, f;
+
+    printf("Enter the length of reference string: ");
     scanf("%d", &n);
 
-    printf("\nEnter the reference string: ");
-    for (i = 0; i < n; i++)
-        scanf("%d", &rs[i]);
+    int pages[n];
+    printf("Enter the reference string: ");
+    for (int i = 0; i < n; i++)
+        scanf("%d", &pages[i]);
 
-    printf("\nEnter the number of frames: ");
+    printf("Enter the number of frames: ");
     scanf("%d", &f);
-    for (i = 0; i < f; i++)
-        m[i] = -1;
 
-    printf("\nThe Page Replacement Process is:\n");
-
-    for (i = 0; i < n; i++) {
-        for (k = 0; k < f; k++) {
-            if (m[k] == rs[i])
-                break;
-        }
-
-        if (k == f) {
-            m[count++] = rs[i];
-            pf++; // Increment page fault count
-        }
-
-        for (j = 0; j < f; j++)
-            printf("\t%d", m[j]);
-
-        if (k == f)
-            printf("\tPF No. %d", pf);
-
-        printf("\n");
-
-        if (count == f)
-            count = 0;
-    }
-
-    printf("\nThe number of Page Faults using FIFO are: %d\n", pf);
+    int pageFaults = fifoPageReplacement(pages, n, f);
+    printf("\nTotal Page Faults using FIFO: %d\n", pageFaults);
 
     return 0;
 }
