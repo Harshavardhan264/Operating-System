@@ -1,29 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Semaphores
 int mutex = 1;
 int full = 0;
 int empty = 10;
 int x = 0;
 
-void producer() {
-    wait(&mutex);
-    signal(&full);
-    wait(&empty);
-    x++;
-    printf("\nProducer produces item %d", x);
-    signal(&mutex);
-}
+void wait(int *s);
+void signal(int *s);
+void producer();
+void consumer();
 
-void consumer() {
-    wait(&mutex);
-    wait(&full);
-    signal(&empty);
-    printf("\nConsumer consumes item %d", x);
-    x--;
-    signal(&mutex);
-}
-
+// Function Definitions
 void wait(int *s) {
     (*s)--;
 }
@@ -32,25 +21,44 @@ void signal(int *s) {
     (*s)++;
 }
 
+void producer() {
+    wait(&mutex);  
+    if (empty > 0) {      
+        signal(&full);
+        wait(&empty);
+        x++;
+        printf("\nProducer produces item %d", x);
+    } else {
+        printf("\nBuffer is full!");
+    }
+    signal(&mutex); 
+}
+
+void consumer() {
+    wait(&mutex); 
+    if (full > 0) {       
+        wait(&full);
+        signal(&empty);
+        printf("\nConsumer consumes item %d", x);
+        x--;
+    } else {
+        printf("\nBuffer is empty!");
+    }
+    signal(&mutex); 
+}
+
 int main() {
     for (int i = 0; i < 5; i++) {
-        if (mutex == 1 && empty != 0) {
-            producer();
-        } else {
-            printf("\nBuffer is full!");
-        }
+        producer(); 
     }
 
     for (int i = 0; i < 3; i++) {
-        if (mutex == 1 && full != 0) {
-            consumer();
-        } else {
-            printf("\nBuffer is empty!");
-        }
+        consumer();  
     }
 
     return 0;
 }
+
 
 //output
 Producer produces item 1
