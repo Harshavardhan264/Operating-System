@@ -1,30 +1,39 @@
-#include<stdio.h>
-#include<stdlib.h>
-int mutex = 1;  
-int full = 0; 
-int empty = 10; 
-int x = 0;     
+#include <stdio.h>
+#include <stdlib.h>
+
+int mutex = 1;
+int full = 0;
+int empty = 10;
+int x = 0;
 
 void producer() {
-    --mutex;   
-    ++full;     
-    --empty;    
+    wait(&mutex);
+    signal(&full);
+    wait(&empty);
     x++;
     printf("\nProducer produces item %d", x);
-    ++mutex;    
+    signal(&mutex);
 }
 
 void consumer() {
-    --mutex;   
-    --full;     
-    ++empty;   
+    wait(&mutex);
+    wait(&full);
+    signal(&empty);
     printf("\nConsumer consumes item %d", x);
     x--;
-    ++mutex;    
+    signal(&mutex);
+}
+
+void wait(int *s) {
+    (*s)--;
+}
+
+void signal(int *s) {
+    (*s)++;
 }
 
 int main() {
-    for(int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
         if (mutex == 1 && empty != 0) {
             producer();
         } else {
@@ -32,7 +41,7 @@ int main() {
         }
     }
 
-    for(int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
         if (mutex == 1 && full != 0) {
             consumer();
         } else {
@@ -42,7 +51,6 @@ int main() {
 
     return 0;
 }
-
 
 //output
 Producer produces item 1
