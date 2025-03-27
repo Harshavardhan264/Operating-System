@@ -1,69 +1,67 @@
 #include <stdio.h>
 
+int findLRU(int time[], int n) {
+    int i, min = time[0], pos = 0;
+    for (i = 1; i < n; i++) {
+        if (time[i] < min) {
+            min = time[i];
+            pos = i;
+        }
+    }
+    return pos;
+}
+
 int main() {
-    int i, j, min, rs[25], m[10], count[10], flag[25], n, f, pf = 0, next = 1;
-
-    printf("Enter the length of reference string: ");
-    scanf("%d", &n);
-
-    printf("Enter the reference string: ");
-    for (i = 0; i < n; i++) {
-        scanf("%d", &rs[i]);
-        flag[i] = 0;
-    }
-
+    int frames, pages, i, j, pos, pageFaults = 0;
     printf("Enter the number of frames: ");
-    scanf("%d", &f);
+    scanf("%d", &frames);
+    
+    printf("Enter the number of pages: ");
+    scanf("%d", &pages);
+    
+    int reference[pages], memory[frames], time[frames];
+    
+    printf("Enter the reference string: ");
+    for (i = 0; i < pages; i++)
+        scanf("%d", &reference[i]);
 
-    for (i = 0; i < f; i++) {
-        count[i] = 0;
-        m[i] = -1;
-    }
+    for (i = 0; i < frames; i++)
+        memory[i] = -1; // Initialize frames as empty
 
-    printf("\nThe Page Replacement Process is:\n");
+    printf("\nPage Replacement Process:\n");
 
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < pages; i++) {
         int found = 0;
 
-        for (j = 0; j < f; j++) {
-            if (m[j] == rs[i]) {
-                flag[i] = 1;
-                count[j] = next++;
+        for (j = 0; j < frames; j++) {
+            if (memory[j] == reference[i]) {
                 found = 1;
+                time[j] = i; // Update last used time
                 break;
             }
         }
 
-        // Page Fault Occurs
-        if (!found) {
-            if (i < f) {
-                m[i] = rs[i];
-                count[i] = next++;
+        if (!found) { // Page fault occurs
+            if (i < frames) {
+                memory[i] = reference[i];
+                time[i] = i;
             } else {
-                min = 0;
-                for (j = 1; j < f; j++) {
-                    if (count[min] > count[j])
-                        min = j;
-                }
-                m[min] = rs[i];
-                count[min] = next++;
+                pos = findLRU(time, frames); // Find LRU page
+                memory[pos] = reference[i];
+                time[pos] = i;
             }
-            pf++;
+            pageFaults++;
         }
 
-        // Print frame status
-        for (j = 0; j < f; j++) {
-            if (m[j] != -1)
-                printf("%d\t", m[j]);
-            else
-                printf("-\t");
-        }
-
+        // Print current frame state
+        for (j = 0; j < frames; j++)
+            printf("%d\t", memory[j] != -1 ? memory[j] : -1);
+        
         if (!found)
-            printf("PF No. -- %d", pf);
+            printf("Page Fault No. -- %d", pageFaults);
         printf("\n");
     }
 
-    printf("\nTotal Page Faults using LRU: %d\n", pf);
+    printf("\nTotal Page Faults: %d\n", pageFaults);
     return 0;
 }
